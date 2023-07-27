@@ -13,11 +13,27 @@ router.get('/', (req, res) => {
 })
 
 router.post('/', (req, res) => {
+  if (!req.body.pic) {
+    // Default image if one is not provided
+    req.body.pic = 'http://placekitten.com/400/400'
+  }
   db.Place.create(req.body)
   .then(() => {
       res.redirect('/places')
   })
   .catch(err => {
+    if (err && err.name == 'ValidationError') {
+      let message = 'Validation Error: '
+      for (var field in err.errors) {
+        message += `${field} was ${err.errors[field].value}. `
+        message += `${err.errors[field].message}`
+    }
+      res.render('places/new', { message })
+      // TODO: Generate error message(s)
+  }
+  else {
+      res.render('error404')
+  }
       console.log('err', err)
       res.render('error404')
   })
@@ -63,3 +79,12 @@ router.delete('/:id/rant/:rantId', (req, res) => {
 
 
 module.exports = router
+
+
+
+
+
+
+
+
+
